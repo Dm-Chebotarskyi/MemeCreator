@@ -12,6 +12,9 @@
         #image-container {
             display: flex;
         }
+        button {
+            width: 150px;
+        }
     </style>
 </head>
 
@@ -27,8 +30,12 @@
             <input id="topLineText" type="text"><br/>
             <span>Bottom Line:</span><br/>
             <input id="bottomLineText" type="text"><br/>
+            <hr>
             <button id="grayBtn">Make grayscale</button>
             <button id="cancelGrayBtn">Cancel grayscale</button>
+            <hr>
+            <button id="inverseBtn" >Inverse image</button>
+            <button id="cancelInverseBtn">Cancel inversing</button>
             <hr>
             <button id="saveBtn">Save</button>
         </div>
@@ -36,9 +43,6 @@
     <script>
         function makeGrayscale() {
             console.log("making grayscale...");
-            // Get Canvas2DContext
-            var canvas = document.querySelector('canvas');
-            var ctx = canvas.getContext("2d");
 
             if (window.imageSrc != null) {
                 imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -51,12 +55,34 @@
                 }
                 ctx.putImageData(imageData, 0, 0);
                 grayscaled = true;
+                grayscaleBtn.disabled = true;
             }
         }
 
-        function cancelGrayscale(){
+        function cancelGrayscale() {
             grayscaled = false;
+            grayscaleBtn.disabled = false;
             redrawMeme(window.imageSrc, window.topLineText, window.bottomLineText);
+        }
+
+        function inverse() {
+            console.log("making inversed...");
+            // Get Canvas2DContext
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            for (var i = 0; i < imageData.data.length / 4; i++) {
+                imageData.data[i * 4] = 255 - imageData.data[i * 4]; //Red
+                imageData.data[i * 4 + 1] = 255 - imageData.data[i * 4 + 1]; //Green
+                imageData.data[i * 4 + 2] = 255 - imageData.data[i * 4 + 2]; //Blue
+            }
+            ctx.putImageData(imageData, 0, 0);
+            inversed = true;
+            inverseBtn.disabled = true;
+        }
+
+        function cancelInversing() {
+            inversed = false;
+            redrawMeme(window.imageSrc, window.topLineText, window.bottomLineText);
+            inverseBtn.disabled = false;
         }
 
         function textChangeListener(evt) {
@@ -73,9 +99,6 @@
         }
 
         function redrawMeme(image, topLine, bottomLine) {
-            // Get Canvas2DContext
-            var canvas = document.querySelector('canvas');
-            var ctx = canvas.getContext("2d");
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -89,6 +112,9 @@
                 ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
                 if (grayscaled === true) {
                     makeGrayscale();
+                }
+                if (inversed === true) {
+                    inverse();
                 }
             }
 
@@ -133,7 +159,12 @@
             reader.readAsDataURL(file)
         }
 
+        // Get Canvas2DContext
+        var canvas = document.querySelector('canvas');
+        var ctx = canvas.getContext("2d");
+
         var grayscaled = false;
+        var inversed = false;
         window.topLineText = "";
         window.bottomLineText = "";
         var input1 = document.getElementById('topLineText');
@@ -142,8 +173,12 @@
         input2.oninput = textChangeListener;
         document.getElementById('file').addEventListener('change', handleFileSelect, false);
         document.querySelector('#saveBtn').addEventListener('click', saveFile, false);
-        document.querySelector('#grayBtn').addEventListener('click', makeGrayscale, false);
+        var grayscaleBtn = document.querySelector('#grayBtn');
+        grayscaleBtn.addEventListener('click', makeGrayscale, false);
         document.querySelector('#cancelGrayBtn').addEventListener('click', cancelGrayscale, false);
+        var inverseBtn = document.querySelector('#inverseBtn');
+        inverseBtn.addEventListener('click', inverse, false);
+        document.querySelector('#cancelInverseBtn').addEventListener('click', cancelInversing, false);
     </script>
 
 </body>
