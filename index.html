@@ -27,10 +27,38 @@
             <input id="topLineText" type="text"><br/>
             <span>Bottom Line:</span><br/>
             <input id="bottomLineText" type="text"><br/>
+            <button id="grayBtn">Make grayscale</button>
+            <button id="cancelGrayBtn">Cancel grayscale</button>
+            <hr>
             <button id="saveBtn">Save</button>
         </div>
     </div>
     <script>
+        function makeGrayscale() {
+            console.log("making grayscale...");
+            // Get Canvas2DContext
+            var canvas = document.querySelector('canvas');
+            var ctx = canvas.getContext("2d");
+
+            if (window.imageSrc != null) {
+                imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                var grey;
+                for (i = 0; i < imageData.data.length; i = i + 4) {
+                    grey = (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 3;
+                    imageData.data[i] = grey;
+                    imageData.data[i + 1] = grey;
+                    imageData.data[i + 2] = grey;
+                }
+                ctx.putImageData(imageData, 0, 0);
+                grayscaled = true;
+            }
+        }
+
+        function cancelGrayscale(){
+            grayscaled = false;
+            redrawMeme(window.imageSrc, window.topLineText, window.bottomLineText);
+        }
+
         function textChangeListener(evt) {
             var id = evt.target.id;
             var text = evt.target.value;
@@ -48,7 +76,7 @@
             // Get Canvas2DContext
             var canvas = document.querySelector('canvas');
             var ctx = canvas.getContext("2d");
-            // Your code here
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             ctx.font = "30pt Impact";
@@ -59,6 +87,9 @@
 
             if (image != null) {
                 ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+                if (grayscaled === true) {
+                    makeGrayscale();
+                }
             }
 
             if (topLine != null) {
@@ -102,6 +133,7 @@
             reader.readAsDataURL(file)
         }
 
+        var grayscaled = false;
         window.topLineText = "";
         window.bottomLineText = "";
         var input1 = document.getElementById('topLineText');
@@ -109,7 +141,9 @@
         input1.oninput = textChangeListener;
         input2.oninput = textChangeListener;
         document.getElementById('file').addEventListener('change', handleFileSelect, false);
-        document.querySelector('button').addEventListener('click', saveFile, false);
+        document.querySelector('#saveBtn').addEventListener('click', saveFile, false);
+        document.querySelector('#grayBtn').addEventListener('click', makeGrayscale, false);
+        document.querySelector('#cancelGrayBtn').addEventListener('click', cancelGrayscale, false);
     </script>
 
 </body>
